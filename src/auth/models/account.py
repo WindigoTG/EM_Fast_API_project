@@ -14,3 +14,4 @@ class Account(BaseModel):
         back_populates="account",
     )
     secret: Mapped["Secret"] = relationship(back_populates="account")
+    invite: Mapped["Invite"] = relationship(back_populates="account")
