@@ -1,7 +1,8 @@
-from auth.models.account import Account
-from auth.models.invite import Invite
-from auth.models.secret import Secret
-from auth.models.user import User
+from .account import Account
+from .company import Company
+from .invite import Invite
+from .secret import Secret
+from .user import User
 
 __all__ = [
     "Account",
