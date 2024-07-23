@@ -6,6 +6,7 @@ from .user import User
 
 __all__ = [
     "Account",
+    "Company",
     "Invite",
     "Secret",
     "User",

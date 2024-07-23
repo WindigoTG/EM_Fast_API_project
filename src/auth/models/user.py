@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from sqlalchemy import Boolean, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -18,5 +20,5 @@ class User(BaseModel):
         back_populates="user",
     )
     secret: Mapped["Secret"] = relationship(back_populates="user")
-    company_id: Mapped[int] = mapped_column(ForeignKey("company.id"))
+    company_id: Mapped[uuid4] = mapped_column(ForeignKey("company.id"))
     company: Mapped["Company"] = relationship(back_populates="users")

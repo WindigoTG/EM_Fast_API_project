@@ -11,7 +11,7 @@ class Invite(BaseModel):
 
     id: Mapped[custom_types.uuid_pk_T]
     token: Mapped[int]
-    account_id: Mapped[uuid4()] = mapped_column(ForeignKey("account.id"))
+    account_id: Mapped[uuid4] = mapped_column(ForeignKey("account.id", ondelete="CASCADE"))
     account: Mapped["Account"] = relationship(
         back_populates="invite",
         single_parent=True,

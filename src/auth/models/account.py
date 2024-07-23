@@ -1,4 +1,5 @@
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy import Boolean
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.models import BaseModel, custom_types
 
@@ -8,8 +9,8 @@ class Account(BaseModel):
 
     id: Mapped[custom_types.uuid_pk_T]
     account: Mapped[custom_types.str_50_T]
-    is_verified: Mapped[bool]
-    user: Mapped["Account"] = relationship(
+    is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    user: Mapped["User"] = relationship(
         secondary="secret",
         back_populates="account",
     )

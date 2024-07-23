@@ -1,22 +1,24 @@
-from sqlalchemy import ForeignKey
+from uuid import uuid4
+
+from sqlalchemy import ForeignKey, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.models import BaseModel, custom_types
+from src.models import BaseModel
 
 
 class Secret(BaseModel):
     __tablename__ = "secret"
 
-    account_id: Mapped[custom_types.uuid_pk_T] = mapped_column(
-        ForeignKey("account.id"),
+    account_id: Mapped[uuid4] = mapped_column(
+        UUID,
+        ForeignKey("account.id", ondelete="CASCADE"),
         primary_key=True,
-        onupdate="CASCADE",
     )
-    user_id: Mapped[custom_types.uuid_pk_T] = mapped_column(
-        ForeignKey("user.id"),
+    user_id: Mapped[uuid4] = mapped_column(
+        UUID,
+        ForeignKey("user.id", ondelete="CASCADE"),
         primary_key=True,
-        onupdate="CASCADE",
     )
-    hashed_password = Mapped[str]
+    hashed_password: Mapped[str]
     account: Mapped["Account"] = relationship(back_populates="secret")
     user: Mapped["User"] = relationship(back_populates="secret")
