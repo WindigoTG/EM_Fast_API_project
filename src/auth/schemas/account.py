@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, UUID4
+from pydantic import BaseModel, EmailStr, Field, UUID4
 
 
 class IdAccountSchema(BaseModel):
@@ -6,7 +6,12 @@ class IdAccountSchema(BaseModel):
 
 
 class CreateAccountSchema(BaseModel):
-    account: str = Field(max_length=50)
+    account: EmailStr = Field(max_length=50)
+
+
+class VerifyAccountSchema(BaseModel):
+    account: EmailStr = Field(max_length=50)
+    invite_token: int
 
 
 class AccountSchema(IdAccountSchema, CreateAccountSchema):
