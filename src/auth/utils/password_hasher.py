@@ -1,7 +1,13 @@
-import hashlib
+import bcrypt
 
 
-def hash_password(password):
-    password_bytes = password.encode('utf-8')
-    hash_object = hashlib.sha256(password_bytes)
-    return hash_object.hexdigest()
+def hash_password(password: str | bytes) -> bytes:
+    if not isinstance(password, bytes):
+        password = password.encode('utf-8')
+    return bcrypt.hashpw(password, bcrypt.gensalt())
+
+
+def check_password(password: str | bytes, hashed: bytes) -> bool:
+    if not isinstance(password, bytes):
+        password = password.encode('utf-8')
+    return bcrypt.checkpw(password, hashed)
