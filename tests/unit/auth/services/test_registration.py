@@ -1,6 +1,6 @@
 import pytest
 
-from src.auth.services.auth import AuthService
+from src.auth.services.registration import RegistrationService
 from src.auth.units_of_work.auth import AuthUnitOfWork
 from tests.fakes.auth.fake_params import (
     TEST_CHECK_IF_ACCOUNT_AVAILABLE_PARAMS,
@@ -11,8 +11,8 @@ from tests.fakes.auth.fake_params import (
 )
 
 
-class TestAuthService:
-    class _AuthService(AuthService):
+class TestRegistrationService:
+    class _RegistrationService(RegistrationService):
         ...
 
     @pytest.mark.parametrize(
@@ -32,9 +32,11 @@ class TestAuthService:
         await add_accounts()
 
         with expectation:
-            is_available = await self._AuthService.check_if_account_available(
-                uow=AuthUnitOfWork(),
-                **kwargs,
+            is_available = await (
+                self._RegistrationService.check_if_account_available(
+                    uow=AuthUnitOfWork(),
+                    **kwargs,
+                )
             )
 
             assert is_available is expected_result
@@ -57,7 +59,7 @@ class TestAuthService:
         await add_accounts()
 
         with expectation:
-            result = await self._AuthService.create_account(
+            result = await self._RegistrationService.create_account(
                 uow=AuthUnitOfWork(),
                 **kwargs,
             )
@@ -84,7 +86,7 @@ class TestAuthService:
         await add_invites()
 
         with expectation:
-            result = await self._AuthService.verify_account(
+            result = await self._RegistrationService.verify_account(
                 uow=AuthUnitOfWork(),
                 **kwargs,
             )
@@ -106,9 +108,11 @@ class TestAuthService:
         await add_all_entities()
 
         with expectation:
-            result = await self._AuthService.create_user_and_company(
-                uow=AuthUnitOfWork(),
-                **kwargs,
+            result, _ = (
+                await self._RegistrationService.create_user_and_company(
+                    uow=AuthUnitOfWork(),
+                    **kwargs,
+                )
             )
             assert result == expected_result
 
@@ -129,7 +133,7 @@ class TestAuthService:
 
         with expectation:
             result = (
-                await self._AuthService.create_account_and_user_for_company(
+                await self._RegistrationService.create_account_and_user_for_company(
                     uow=AuthUnitOfWork(),
                     **kwargs,
                 )

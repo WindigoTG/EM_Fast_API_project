@@ -1,14 +1,14 @@
 from typing import Union
 from uuid import uuid4
 
-from src.auth.utils.enums import AuthServiceOperationResultEnum
+from src.auth.schemas.responses import UserAndCompanyCreatedResponse
+from src.auth.utils.enums import RegistrationServiceResultEnum
 from src.auth.utils.password_hasher import hash_password
 from src.auth.utils.token_generator import generate_int_token
-from src.utils.service import BaseService
 from src.utils.unit_of_work import UnitOfWork
 
 
-class AuthService(BaseService):
+class RegistrationService:
     @classmethod
     async def check_if_account_available(
         cls,
@@ -29,17 +29,19 @@ class AuthService(BaseService):
         cls,
         uow: UnitOfWork,
         account: str
-    ) -> AuthServiceOperationResultEnum:
+    ) -> RegistrationServiceResultEnum:
         async with uow:
             if (
                 await uow.repositories["account"].get_by_query_one_or_none(
                     account=account,
                 )
             ):
-                return AuthServiceOperationResultEnum.ACCOUNT_ALREADY_EXISTS
+                return RegistrationServiceResultEnum.ACCOUNT_ALREADY_EXISTS
 
-            new_account_id = await uow.repositories["account"].add_one_and_get_id(
-                account=account,
+            new_account_id = (
+                await uow.repositories["account"].add_one_and_get_id(
+                    account=account,
+                )
             )
             invite_token = generate_int_token()
             await uow.repositories["invite"].add_one(
@@ -49,7 +51,7 @@ class AuthService(BaseService):
 
         # TODO: send e-mail notification
 
-        return AuthServiceOperationResultEnum.SUCCESS
+        return RegistrationServiceResultEnum.SUCCESS
 
     @classmethod
     async def create_account_and_user_for_company(
@@ -58,7 +60,7 @@ class AuthService(BaseService):
             company_id: Union[int, str, uuid4],
             first_name: str,
             last_name: str,
-    ) -> AuthServiceOperationResultEnum:
+    ) -> RegistrationServiceResultEnum:
         async with uow:
             company = (
                 await uow.repositories["company"].get_by_query_one_or_none(
@@ -67,14 +69,14 @@ class AuthService(BaseService):
             )
 
             if not company:
-                return AuthServiceOperationResultEnum.COMPANY_DOES_NOT_EXIST
+                return RegistrationServiceResultEnum.COMPANY_DOES_NOT_EXIST
 
             if (
                 await uow.repositories["account"].get_by_query_one_or_none(
                     account=account,
                 )
             ):
-                return AuthServiceOperationResultEnum.ACCOUNT_ALREADY_EXISTS
+                return RegistrationServiceResultEnum.ACCOUNT_ALREADY_EXISTS
 
             new_account = await uow.repositories[
                 "account"].add_one_and_get_obj(
@@ -90,7 +92,7 @@ class AuthService(BaseService):
                 first_name=first_name,
                 last_name=last_name,
                 company_id=company.id,
-                is_admin=True,
+                is_admin=False,
             )
 
             await uow.repositories["secret"].add_one(
@@ -101,7 +103,7 @@ class AuthService(BaseService):
 
         # TODO: send e-mail notification
 
-        return AuthServiceOperationResultEnum.SUCCESS
+        return RegistrationServiceResultEnum.SUCCESS
 
     @classmethod
     async def verify_account(
@@ -109,7 +111,7 @@ class AuthService(BaseService):
         uow: UnitOfWork,
         account: str,
         invite_token: int,
-    ) -> AuthServiceOperationResultEnum:
+    ) -> RegistrationServiceResultEnum:
         async with uow:
             account_to_validate = (
                 await uow.repositories[
@@ -119,19 +121,19 @@ class AuthService(BaseService):
                 )
             )
             if not account_to_validate:
-                return AuthServiceOperationResultEnum.ACCOUNT_DOES_NOT_EXIST
+                return RegistrationServiceResultEnum.ACCOUNT_DOES_NOT_EXIST
 
             if account_to_validate.is_verified:
-                return AuthServiceOperationResultEnum.ACCOUNT_ALREADY_VERIFIED
+                return RegistrationServiceResultEnum.ACCOUNT_ALREADY_VERIFIED
 
             if account_to_validate.invite.token != invite_token:
-                return AuthServiceOperationResultEnum.WRONG_TOKEN
+                return RegistrationServiceResultEnum.WRONG_TOKEN
 
             await uow.repositories["account"].update_one_by_id(
                 account_to_validate.id,
                 {"is_verified": True}
             )
-            return AuthServiceOperationResultEnum.SUCCESS
+            return RegistrationServiceResultEnum.SUCCESS
 
     @classmethod
     async def create_user_and_company(
@@ -142,7 +144,10 @@ class AuthService(BaseService):
         first_name: str,
         last_name: str,
         company_name: str,
-    ) -> AuthServiceOperationResultEnum:
+    ) -> tuple[
+        RegistrationServiceResultEnum,
+        UserAndCompanyCreatedResponse | None
+    ]:
         async with uow:
             account = await (
                 uow.repositories[
@@ -152,13 +157,22 @@ class AuthService(BaseService):
                 )
             )
             if not account:
-                return AuthServiceOperationResultEnum.ACCOUNT_DOES_NOT_EXIST
+                return (
+                    RegistrationServiceResultEnum.ACCOUNT_DOES_NOT_EXIST,
+                    None,
+                )
 
             if not account.is_verified:
-                return AuthServiceOperationResultEnum.ACCOUNT_NOT_VERIFIED
+                return (
+                    RegistrationServiceResultEnum.ACCOUNT_NOT_VERIFIED,
+                    None,
+                )
 
             if account.secret:
-                return AuthServiceOperationResultEnum.ACCOUNT_IN_USE
+                return (
+                    RegistrationServiceResultEnum.ACCOUNT_IN_USE,
+                    None,
+                )
 
             company_id = await uow.repositories["company"].add_one_and_get_id(
                 name=company_name,
@@ -168,7 +182,7 @@ class AuthService(BaseService):
                 first_name=first_name,
                 last_name=last_name,
                 company_id=company_id,
-                is_admin=False,
+                is_admin=True,
             )
 
             hashed_password = hash_password(password)
@@ -179,4 +193,10 @@ class AuthService(BaseService):
                 hashed_password=hashed_password,
             )
 
-            return AuthServiceOperationResultEnum.SUCCESS
+            return (
+                RegistrationServiceResultEnum.SUCCESS,
+                UserAndCompanyCreatedResponse(
+                    user_id=user_id,
+                    company_id=company_id,
+                )
+            )

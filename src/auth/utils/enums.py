@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class AuthServiceOperationResultEnum(Enum):
+class RegistrationServiceResultEnum(Enum):
     SUCCESS = 0
     ACCOUNT_DOES_NOT_EXIST = 1
     ACCOUNT_ALREADY_EXISTS = 2
