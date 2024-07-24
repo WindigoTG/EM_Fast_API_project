@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, UUID4
+from pydantic import BaseModel, EmailStr, Field, UUID4, ConfigDict
 
 
 class IdUserSchema(BaseModel):
@@ -11,11 +11,16 @@ class BaseUserSchema(BaseModel):
 
 
 class CreateUserSchema(BaseUserSchema):
-    company_name: str = Field(max_length=50)
     password: str = Field(alias="pass")
-    account: str
+    account: EmailStr
+
+
+class CreateUserWithCompanySchema(CreateUserSchema):
+    company_name: str = Field(max_length=50)
 
 
 class UserSchema(IdUserSchema, BaseUserSchema):
     company_id: UUID4
     is_admin: bool
+
+    model_config = ConfigDict(from_attributes=True)
