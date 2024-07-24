@@ -19,6 +19,6 @@ class Secret(BaseModel):
         ForeignKey("user.id", ondelete="CASCADE"),
         primary_key=True,
     )
-    hashed_password: Mapped[str]
+    hashed_password: Mapped[bytes]
     account: Mapped["Account"] = relationship(back_populates="secret")
     user: Mapped["User"] = relationship(back_populates="secret")
