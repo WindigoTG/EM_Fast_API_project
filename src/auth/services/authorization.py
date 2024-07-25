@@ -14,7 +14,6 @@ from src.auth.schemas.jwt_token import TokenSchema
 from src.auth.utils import jwt_encoder, password_hasher
 from src.auth.units_of_work.auth import AuthUnitOfWork
 
-
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/api/v1/auth/jwt/login/",
 )
@@ -25,7 +24,7 @@ class AuthorizationService:
     async def mint_token(
         cls,
         uow: AuthUnitOfWork = Depends(AuthUnitOfWork),
-        account: str = Form(),
+        account: str = Form(alias="username"),
         password: str = Form(),
     ) -> TokenSchema:
         unauthed_exc = HTTPException(
@@ -59,7 +58,7 @@ class AuthorizationService:
         )
 
     @classmethod
-    def get_current_auth_user(
+    async def get_current_auth_user(
         cls,
         uow: AuthUnitOfWork = Depends(AuthUnitOfWork),
         token: str = Depends(oauth2_scheme)
@@ -68,7 +67,6 @@ class AuthorizationService:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Invalid token",
         )
-
         try:
             payload = jwt_encoder.decode_jwt(token=token)
         except InvalidTokenError:
@@ -77,9 +75,11 @@ class AuthorizationService:
         user_id = payload.get("sub")
         if not user_id:
             raise unauth_error
-
-        user = uow.repositories["user"].get_by_query_one_or_none(id=user_id)
-        if not user:
-            raise unauth_error
+        async with uow:
+            user = await uow.repositories["user"].get_by_query_one_or_none(
+                id=user_id,
+            )
+            if not user:
+                raise unauth_error
 
         return UserSchema.model_validate(user)

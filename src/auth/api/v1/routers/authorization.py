@@ -10,4 +10,5 @@ router = APIRouter()
 async def login(
     token: TokenSchema = Depends(AuthorizationService.mint_token)
 ) -> TokenSchema:
+
     return token

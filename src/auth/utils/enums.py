@@ -10,3 +10,6 @@ class RegistrationServiceResultEnum(Enum):
     ACCOUNT_IN_USE = 5
     WRONG_TOKEN = 6
     COMPANY_DOES_NOT_EXIST = 7
+    NOT_ALLOWED = 8,
+    USER_NOT_CREATED = 9,
+

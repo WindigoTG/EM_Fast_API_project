@@ -16,3 +16,7 @@ class VerifyAccountSchema(BaseModel):
 
 class AccountSchema(IdAccountSchema, CreateAccountSchema):
     is_verified: bool
+
+
+class UpdateAccountSchema(CreateAccountSchema):
+    new_account: EmailStr = Field(max_length=50)
