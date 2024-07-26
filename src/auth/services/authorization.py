@@ -25,7 +25,7 @@ oauth2_scheme = OAuth2PasswordBearer(
 class AuthorizationService:
     INVALID_TOKEN_EXCEPTION = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail=f"Invalid token",
+        detail="Invalid token",
     )
     UNAUTHENTICATED_EXCEPTION = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,

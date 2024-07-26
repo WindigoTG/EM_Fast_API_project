@@ -10,7 +10,6 @@ from sqlalchemy.ext.asyncio import (
     AsyncEngine,
 )
 
-from src.auth import models
 from src.config import settings
 from src.models import BaseModel
 from src.main import app

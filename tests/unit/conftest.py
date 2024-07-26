@@ -1,8 +1,6 @@
-from copy import deepcopy
-from typing import Callable, List, Sequence
+from typing import Callable, Sequence
 
 import pytest
-from sqlalchemy import text, Result, select, insert
 
 
 @pytest.fixture(scope="session")

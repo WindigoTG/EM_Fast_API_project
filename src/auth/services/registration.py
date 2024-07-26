@@ -1,5 +1,6 @@
 from sqlalchemy.exc import IntegrityError
 
+from src.auth.tasks.tasks import send_email_registration_token
 from src.auth.schemas.responses import UserAndCompanyCreatedResponse
 from src.auth.schemas.user import UserSchema
 from src.auth.utils.enums import RegistrationServiceResultEnum
@@ -49,7 +50,7 @@ class RegistrationService:
                 token=invite_token,
             )
 
-        # TODO: send e-mail notification
+        send_email_registration_token.delay(invite_token, account)
 
         return RegistrationServiceResultEnum.SUCCESS
 
@@ -203,7 +204,7 @@ class RegistrationService:
                 hashed_password=b'',
             )
 
-        # TODO: send e-mail notification
+        send_email_registration_token.delay(invite_token, account)
 
         return RegistrationServiceResultEnum.SUCCESS
 

@@ -1,7 +1,6 @@
 from pathlib import Path
 
 from dotenv import find_dotenv, load_dotenv
-from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -23,6 +22,15 @@ class Settings(BaseSettings):
     ALGORITHM: str = "RS256"
     ACCESS_TOKEN_LIFETIME: int = 15
     REFRESH_TOKEN_LIFETIME: int = 30
+
+    SMTP_HOST: str
+    SMTP_PORT: int
+    SMTP_USER: str
+    SMTP_PASSWORD: str
+
+    REDIS_PASSWORD: str
+    REDIS_HOST: str
+    REDIS_PORT: int
 
     @property
     def PRIVATE_KEY_PATH(self):
