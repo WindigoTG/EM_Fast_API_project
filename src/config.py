@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     CERTS_DIRECTORY_NAME: str
     ALGORITHM: str = "RS256"
     ACCESS_TOKEN_LIFETIME: int = 15
+    REFRESH_TOKEN_LIFETIME: int = 30
 
     @property
     def PRIVATE_KEY_PATH(self):
@@ -34,7 +35,6 @@ class Settings(BaseSettings):
     @property
     def DATABASE_URL(self):
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
-
 
     model_config = SettingsConfigDict(env_file='../.env')
 

@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, StrEnum
 
 
 class RegistrationServiceResultEnum(Enum):
@@ -13,3 +13,7 @@ class RegistrationServiceResultEnum(Enum):
     NOT_ALLOWED = 8,
     USER_NOT_CREATED = 9,
 
+
+class TokenTypeEnum(StrEnum):
+    ACCESS = "access"
+    REFRESH = "refresh"

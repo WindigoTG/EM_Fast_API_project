@@ -9,10 +9,13 @@ from fastapi.security import (
     OAuth2PasswordBearer,
 )
 
+from src.auth.models import User
 from src.auth.schemas.user import UserSchema
 from src.auth.schemas.jwt_token import TokenSchema
 from src.auth.utils import jwt_encoder, password_hasher
+from src.auth.utils.enums import TokenTypeEnum
 from src.auth.units_of_work.auth import AuthUnitOfWork
+from src.config import settings
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/api/v1/auth/jwt/login/",
@@ -20,17 +23,24 @@ oauth2_scheme = OAuth2PasswordBearer(
 
 
 class AuthorizationService:
+    INVALID_TOKEN_EXCEPTION = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail=f"Invalid token",
+    )
+    UNAUTHENTICATED_EXCEPTION = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid account or password",
+    )
+    TOKEN_TYPE_FIELD = "type"
+
     @classmethod
     async def mint_token(
         cls,
         uow: AuthUnitOfWork = Depends(AuthUnitOfWork),
-        account: str = Form(alias="username"),
+        account: str = Form(alias="username", ),
         password: str = Form(),
     ) -> TokenSchema:
-        unauthed_exc = HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid account or password",
-        )
+
         async with uow:
             account = await (
                 uow.repositories[
@@ -40,21 +50,43 @@ class AuthorizationService:
                 )
             )
         if not account or not account.is_verified or not account.secret:
-            raise unauthed_exc
+            raise cls.UNAUTHENTICATED_EXCEPTION
 
         if not password_hasher.check_password(
                 password=password,
                 hashed=account.secret.hashed_password,
         ):
-            raise unauthed_exc
+            raise cls.UNAUTHENTICATED_EXCEPTION
 
-        token_payload = {
-            "sub": account.secret.user.id.hex
-        }
-        token = jwt_encoder.encode_jwt(token_payload)
+        access_token = cls._create_access_token(
+            account.secret.user,
+            TokenTypeEnum.ACCESS,
+        )
+        refresh_token = cls._create_access_token(
+            account.secret.user,
+            TokenTypeEnum.REFRESH,
+        )
+
+        return TokenSchema(
+            access_token=access_token,
+            refresh_token=refresh_token
+        )
+
+    @classmethod
+    async def refresh_token(
+            cls,
+            uow: AuthUnitOfWork = Depends(AuthUnitOfWork),
+            token: str = Depends(oauth2_scheme)
+    ) -> TokenSchema:
+        user = await cls._get_user_from_token(
+            token,
+            TokenTypeEnum.REFRESH,
+            uow,
+        )
+        token = cls._create_access_token(user, TokenTypeEnum.ACCESS)
+
         return TokenSchema(
             access_token=token,
-            token_type="Bearer",
         )
 
     @classmethod
@@ -63,23 +95,71 @@ class AuthorizationService:
         uow: AuthUnitOfWork = Depends(AuthUnitOfWork),
         token: str = Depends(oauth2_scheme)
     ) -> UserSchema:
-        unauth_error = HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Invalid token",
+
+        user = await AuthorizationService._get_user_from_token(
+            token,
+            TokenTypeEnum.ACCESS,
+            uow,
         )
+
+        return UserSchema.model_validate(user)
+
+    @classmethod
+    def _get_token_payload(cls, token: str):
         try:
             payload = jwt_encoder.decode_jwt(token=token)
         except InvalidTokenError:
-            raise unauth_error
+            raise cls.INVALID_TOKEN_EXCEPTION
+        return payload
 
+    @classmethod
+    async def _get_user_from_token(
+        cls,
+        token: str,
+        token_type: TokenTypeEnum,
+        uow: AuthUnitOfWork,
+    ) -> User:
+        payload = cls._get_token_payload(token)
+        cls._validate_token_type(payload, token_type)
         user_id = payload.get("sub")
         if not user_id:
-            raise unauth_error
+            raise cls.INVALID_TOKEN_EXCEPTION
         async with uow:
             user = await uow.repositories["user"].get_by_query_one_or_none(
                 id=user_id,
             )
             if not user:
-                raise unauth_error
+                raise cls.INVALID_TOKEN_EXCEPTION
 
-        return UserSchema.model_validate(user)
+        return user
+
+    @classmethod
+    def _validate_token_type(
+        cls,
+        payload: dict,
+        token_type: TokenTypeEnum,
+    ) -> bool:
+        current_token_type = payload.get(cls.TOKEN_TYPE_FIELD)
+        if current_token_type == token_type.value:
+            return True
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="invalid token type {curr}, expected {exp}".format(
+                curr=repr(current_token_type),
+                exp=repr(token_type.value)
+            ),
+        )
+
+    @classmethod
+    def _create_access_token(cls, user: User, token_type: TokenTypeEnum):
+        token_payload = {
+            "sub": user.id.hex,
+            cls.TOKEN_TYPE_FIELD: token_type.value
+        }
+
+        if token_type == TokenTypeEnum.ACCESS:
+            lifetime = settings.ACCESS_TOKEN_LIFETIME
+        else:
+            lifetime = settings.REFRESH_TOKEN_LIFETIME * 60 * 24
+
+        return jwt_encoder.encode_jwt(token_payload, token_lifetime=lifetime)
