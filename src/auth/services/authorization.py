@@ -105,6 +105,25 @@ class AuthorizationService:
         return UserSchema.model_validate(user)
 
     @classmethod
+    async def get_current_auth_admin(
+        cls,
+        uow: AuthUnitOfWork = Depends(AuthUnitOfWork),
+        token: str = Depends(oauth2_scheme),
+    ):
+        current_user = await AuthorizationService.get_current_auth_user(
+            uow,
+            token,
+        )
+
+        if not current_user.is_admin:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not a company admin",
+            )
+
+        return current_user
+
+    @classmethod
     def _get_token_payload(cls, token: str):
         try:
             payload = jwt_encoder.decode_jwt(token=token)

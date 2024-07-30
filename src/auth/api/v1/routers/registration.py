@@ -169,7 +169,7 @@ async def verify_account(
 async def register_employee(
     new_user_data: CreateUserWithAccountSchema,
     company_admin: UserSchema = Depends(
-        AuthorizationService.get_current_auth_user,
+        AuthorizationService.get_current_auth_admin,
     ),
     uow: AuthUnitOfWork = Depends(AuthUnitOfWork),
 ):
@@ -198,14 +198,6 @@ async def register_employee(
                     reason="Company does not exist."
                 ).model_dump(),
                 status_code=status.HTTP_404_NOT_FOUND,
-            )
-        case RegistrationServiceResultEnum.NOT_ALLOWED:
-            return JSONResponse(
-                content=BaseErrorResponse(
-                    status=403,
-                    reason="Only company admin can create employees."
-                ).model_dump(),
-                status_code=status.HTTP_403_FORBIDDEN,
             )
         case RegistrationServiceResultEnum.SUCCESS:
             return AccountCreateResponse

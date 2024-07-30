@@ -159,9 +159,6 @@ class RegistrationService:
             last_name: str,
     ) -> RegistrationServiceResultEnum:
 
-        if not company_admin.is_admin:
-            return RegistrationServiceResultEnum.NOT_ALLOWED
-
         company_id = company_admin.company_id
 
         async with uow:
