@@ -1,3 +1,5 @@
+from typing import List
+
 from sqlalchemy import func, Sequence, Integer
 from sqlalchemy.orm import foreign, Mapped, mapped_column, relationship, remote
 
@@ -21,6 +23,10 @@ class Division(BaseModel):
         primaryjoin=remote(path) == foreign(func.subpath(path, 0, -1)),
         backref="children",
         viewonly=True,
+    )
+
+    positions: Mapped[List["DivisionPosition"]] = relationship(
+        back_populates="division"
     )
 
     def __init__(self, name, parent=None):

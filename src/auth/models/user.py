@@ -1,3 +1,4 @@
+from typing import List
 from uuid import uuid4
 
 from sqlalchemy import Boolean, ForeignKey
@@ -22,3 +23,5 @@ class User(BaseModel):
     secret: Mapped["Secret"] = relationship(back_populates="user")
     company_id: Mapped[uuid4] = mapped_column(ForeignKey("company.id"))
     company: Mapped["Company"] = relationship(back_populates="users")
+
+    positions: Mapped[List["Position"]] = relationship(back_populates="user")
