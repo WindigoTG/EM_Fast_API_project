@@ -12,10 +12,10 @@ class DivisionService(BaseService):
 
     @classmethod
     async def update_one_by_id(
-            cls,
-            uow: UnitOfWork,
-            _id: Union[int, str],
-            values: dict
+        cls,
+        uow: UnitOfWork,
+        _id: Union[int, str],
+        values: dict
     ) -> tuple[DivisionServiceOperationResult, Any]:
         updated_data = values.copy()
 
@@ -65,3 +65,29 @@ class DivisionService(BaseService):
                 )
 
             return DivisionServiceOperationResult.SUCCESS, _obj
+
+    @classmethod
+    async def delete_by_id(
+        cls,
+        uow: UnitOfWork,
+        _id: Union[int, str],
+    ) -> DivisionServiceOperationResult:
+        async with uow:
+            division_to_delete = await uow.__dict__[
+                cls.base_repository
+            ].get_by_query_one_or_none(id=_id)
+
+            if not division_to_delete:
+                return DivisionServiceOperationResult.DIVISION_NOT_FOUND
+
+            path = division_to_delete.path
+
+            await uow.__dict__[
+                cls.base_repository
+            ].delete_by_query(id=_id)
+
+            await uow.__dict__[
+                cls.base_repository
+            ].reset_path(path)
+
+            return DivisionServiceOperationResult.SUCCESS

@@ -1,9 +1,12 @@
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 
-from src.auth.schemas.user import UserSchema
 from src.auth.services.authorization import AuthorizationService
-from src.schemas.responses import BaseNotFoundResponse, BaseErrorResponse
+from src.schemas.responses import (
+    BaseNotFoundResponse,
+    BaseErrorResponse,
+    BaseResponse,
+)
 from src.structure.services.division import DivisionService
 from src.structure.units_of_work.division import DivisionUnitOfWork
 from src.structure.schemas.division import DivisionSchema, UpdateDivisionSchema
@@ -103,3 +106,30 @@ async def update_division(
     return DivisionResponse(
         data=DivisionSchema.model_validate(updated_division),
     )
+
+
+@router.delete(
+    "/{division_id}",
+    responses={
+        status.HTTP_403_FORBIDDEN: {"model": BaseErrorResponse},
+        status.HTTP_404_NOT_FOUND: {"model": BaseErrorResponse},
+    },
+    response_model=BaseResponse,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(AuthorizationService.get_current_auth_admin)]
+)
+async def update_division(
+    division_id: int,
+    uow: DivisionUnitOfWork = Depends(DivisionUnitOfWork),
+):
+    result = await DivisionService.delete_by_id(uow, division_id)
+
+    if result == DivisionServiceOperationResult.DIVISION_NOT_FOUND:
+        return JSONResponse(
+            content=BaseNotFoundResponse(
+                reason=f"Division {division_id} does not exist."
+            ).model_dump(),
+            status_code=status.HTTP_404_NOT_FOUND,
+        )
+
+    return BaseResponse()
