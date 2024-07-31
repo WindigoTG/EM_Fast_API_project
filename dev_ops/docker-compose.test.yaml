@@ -1,0 +1,13 @@
+services:
+  postgres:
+    container_name: test_postgres
+    env_file:
+      - .test.env
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    image: postgres
+    ports:
+      - '5431:5432'
+    restart: unless-stopped
