@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 
+from src.auth.services.authorization import AuthorizationService
 from src.schemas.responses import (
     BaseNotFoundResponse,
     BaseErrorResponse,
@@ -29,7 +30,12 @@ from src.structure.schemas.responses import (
 router = APIRouter()
 
 
-@router.post("/")
+@router.post(
+    "/",
+    response_model=PositionCreateResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(AuthorizationService.get_current_auth_admin)],
+)
 async def create_position(
     position: CreatePositionSchema,
     uow: PositionUnitOfWork = Depends(PositionUnitOfWork),
@@ -40,10 +46,19 @@ async def create_position(
     )
 
 
-@router.get("/{position_id}")
+@router.get(
+    "/{position_id}",
+    responses={
+        status.HTTP_404_NOT_FOUND: {"model": BaseNotFoundResponse},
+    },
+    response_model=PositionResponse,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(AuthorizationService.get_current_auth_user)],
+)
 async def get_position(
     position_id: str,
     uow: PositionUnitOfWork = Depends(PositionUnitOfWork),
+
 ):
     position = await PositionService.get_position(uow, position_id)
     if not position:
@@ -59,7 +74,15 @@ async def get_position(
     )
 
 
-@router.put("/{position_id}")
+@router.put(
+    "/{position_id}",
+    responses={
+        status.HTTP_404_NOT_FOUND: {"model": BaseNotFoundResponse},
+    },
+    response_model=PositionResponse,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(AuthorizationService.get_current_auth_admin)],
+)
 async def update_position(
     position_id: str,
     updated_data: UpdatePositionSchema,
@@ -83,7 +106,12 @@ async def update_position(
     )
 
 
-@router.delete("/{position_id}")
+@router.delete(
+    "/{position_id}",
+    response_model=BaseResponse,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(AuthorizationService.get_current_auth_admin)],
+)
 async def delete_position(
     position_id: str,
     uow: PositionUnitOfWork = Depends(PositionUnitOfWork),
@@ -93,7 +121,15 @@ async def delete_position(
     return BaseResponse()
 
 
-@router.post("/assigned")
+@router.post(
+    "/assigned",
+    responses={
+        status.HTTP_400_BAD_REQUEST: {"model": BaseErrorResponse},
+    },
+    response_model=CreateDivisionPositionSchema,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(AuthorizationService.get_current_auth_admin)],
+)
 async def assign_position_to_division(
     div_pos_data: CreateDivisionPositionSchema,
     uow: PositionUnitOfWork = Depends(PositionUnitOfWork),
@@ -118,7 +154,12 @@ async def assign_position_to_division(
     )
 
 
-@router.delete("/assigned/{div_pos_id}")
+@router.delete(
+    "/assigned/{div_pos_id}",
+    response_model=BaseResponse,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(AuthorizationService.get_current_auth_admin)],
+)
 async def remove_position_from_division(
     div_pos_id: str,
     uow: PositionUnitOfWork = Depends(PositionUnitOfWork),
@@ -128,7 +169,15 @@ async def remove_position_from_division(
     return BaseResponse()
 
 
-@router.put("/assigned/{div_pos_id}")
+@router.put(
+    "/assigned/{div_pos_id}",
+    responses={
+        status.HTTP_404_NOT_FOUND: {"model": BaseNotFoundResponse},
+    },
+    response_model=DivisionPositionResponse,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(AuthorizationService.get_current_auth_admin)],
+)
 async def update_division_position(
     div_pos_id: str,
     role: RoleDivisionPositionSchema,
@@ -153,7 +202,15 @@ async def update_division_position(
     )
 
 
-@router.get("/assigned/{div_pos_id}")
+@router.get(
+    "/assigned/{div_pos_id}",
+    responses={
+        status.HTTP_404_NOT_FOUND: {"model": BaseNotFoundResponse},
+    },
+    response_model=DivisionPositionResponse,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(AuthorizationService.get_current_auth_user)],
+)
 async def get_division_position(
     div_pos_id: str,
     uow: PositionUnitOfWork = Depends(PositionUnitOfWork),
@@ -176,7 +233,15 @@ async def get_division_position(
     )
 
 
-@router.post("/assigned/{div_pos_id}/user")
+@router.post(
+    "/assigned/{div_pos_id}/user",
+    responses={
+        status.HTTP_404_NOT_FOUND: {"model": BaseNotFoundResponse},
+    },
+    response_model=DivisionPositionResponse,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(AuthorizationService.get_current_auth_admin)],
+)
 async def assign_user_to_position(
     div_pos_id: str,
     user_data: UserDivisionPositionSchema,
@@ -201,7 +266,15 @@ async def assign_user_to_position(
     )
 
 
-@router.delete("/assigned/{div_pos_id}/user")
+@router.delete(
+    "/assigned/{div_pos_id}/user",
+    responses={
+        status.HTTP_404_NOT_FOUND: {"model": BaseNotFoundResponse},
+    },
+    response_model=DivisionPositionResponse,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(AuthorizationService.get_current_auth_admin)],
+)
 async def remove_user_from_position(
     div_pos_id: str,
     uow: PositionUnitOfWork = Depends(PositionUnitOfWork),
