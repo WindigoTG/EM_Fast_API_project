@@ -2,8 +2,15 @@ from typing import Union, Any
 
 from sqlalchemy_utils import Ltree
 
+from src.schemas.responses import BaseResponse
+from src.structure.schemas.division import DivisionSchema
+from src.structure.schemas.responses import (
+    DivisionCreateResponse,
+    DivisionResponse,
+)
 from src.structure.utils.enums import DivisionServiceOperationResult
 from src.utils.service import BaseService
+from src.utils.response_factory import ResponseFactory
 from src.utils.unit_of_work import UnitOfWork
 
 
@@ -16,7 +23,7 @@ class DivisionService(BaseService):
         uow: UnitOfWork,
         _id: Union[int, str],
         values: dict
-    ) -> tuple[DivisionServiceOperationResult, Any]:
+    ) -> Any:
         updated_data = values.copy()
 
         try:
@@ -53,13 +60,17 @@ class DivisionService(BaseService):
                 ].get_by_query_one_or_none(id=parent_id)
 
             if not parent and (parent_path or parent_id):
-                return DivisionServiceOperationResult.INCORRECT_PARENT, None
+                return ResponseFactory.get_not_found_response(
+                    "Division does not exist."
+                )
 
             div_path = Ltree(str(_id))
             new_path = parent.path + div_path if parent else div_path
 
             if new_path != div_path and new_path.ancestor_of(div_path):
-                return DivisionServiceOperationResult.INCORRECT_PARENT, None
+                return ResponseFactory.get_base_error_response(
+                    "Incorrect parent"
+                )
 
             updated_data["path"] = new_path
 
@@ -75,21 +86,25 @@ class DivisionService(BaseService):
                     cls.base_repository
                 ].change_path_of_descendants(old_path, _obj.path)
 
-            return DivisionServiceOperationResult.SUCCESS, _obj
+            return DivisionResponse(
+                data=DivisionSchema.model_validate(_obj),
+            )
 
     @classmethod
     async def delete_by_id(
         cls,
         uow: UnitOfWork,
         _id: Union[int, str],
-    ) -> DivisionServiceOperationResult:
+    ) -> Any:
         async with uow:
             division_to_delete = await uow.repositories[
                 cls.base_repository
             ].get_by_query_one_or_none(id=_id)
 
             if not division_to_delete:
-                return DivisionServiceOperationResult.DIVISION_NOT_FOUND
+                ResponseFactory.get_not_found_response(
+                    "Division does not exist."
+                )
 
             path = division_to_delete.path
 
@@ -101,4 +116,34 @@ class DivisionService(BaseService):
                 cls.base_repository
             ].change_path_of_descendants(path, path[0:-1])
 
-            return DivisionServiceOperationResult.SUCCESS
+            return BaseResponse()
+
+    @classmethod
+    async def add_one_and_get_obj(
+            cls,
+            uow: UnitOfWork,
+            **kwargs
+    ) -> Any:
+        async with uow:
+            _obj = await super().add_one_and_get_obj(**kwargs)
+
+        return DivisionCreateResponse(
+            data=DivisionSchema.model_validate(_obj)
+        )
+
+    @classmethod
+    async def get_by_query_one_or_none(
+            cls,
+            uow: UnitOfWork,
+            **kwargs
+    ) -> Any:
+        async with uow:
+            _result = await super().get_by_query_one_or_none(**kwargs)
+
+            if _result:
+                return DivisionResponse(
+                    data=DivisionSchema.model_validate(_result))
+
+            return ResponseFactory.get_not_found_response(
+                "Division does not exist."
+            )

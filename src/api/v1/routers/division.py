@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, status
-from fastapi.responses import JSONResponse
 
 from src.auth.services.authorization import AuthorizationService
 from src.schemas.responses import (
@@ -8,12 +7,11 @@ from src.schemas.responses import (
     BaseResponse,
 )
 from src.structure.services.division import DivisionService
-from src.structure.schemas.division import DivisionSchema, UpdateDivisionSchema
+from src.structure.schemas.division import UpdateDivisionSchema
 from src.structure.schemas.responses import (
     DivisionCreateResponse,
     DivisionResponse,
 )
-from src.structure.utils.enums import DivisionServiceOperationResult
 from src.utils.unit_of_work import UnitOfWork
 
 
@@ -30,11 +28,8 @@ async def create_division(
     name: str,
     uow: UnitOfWork = Depends(UnitOfWork),
 ):
-    new_division = await DivisionService.add_one_and_get_obj(uow, name=name)
-
-    return DivisionCreateResponse(
-        data=DivisionSchema.model_validate(new_division)
-    )
+    result = await DivisionService.add_one_and_get_obj(uow, name=name)
+    return result
 
 
 @router.get(
@@ -50,20 +45,12 @@ async def get_division(
     division_id: int,
     uow: UnitOfWork = Depends(UnitOfWork),
 ):
-    division = await DivisionService.get_by_query_one_or_none(
+    result = await DivisionService.get_by_query_one_or_none(
         uow,
         id=division_id,
     )
 
-    if division:
-        return DivisionResponse(data=DivisionSchema.model_validate(division))
-
-    return JSONResponse(
-        content=BaseNotFoundResponse(
-            reason=f"Division {division_id} does not exist."
-        ).model_dump(),
-        status_code=status.HTTP_404_NOT_FOUND,
-    )
+    return result
 
 
 @router.put(
@@ -82,30 +69,12 @@ async def update_division(
     updated_data: UpdateDivisionSchema,
     uow: UnitOfWork = Depends(UnitOfWork),
 ):
-    result, updated_division = await DivisionService.update_one_by_id(
+    result = await DivisionService.update_one_by_id(
         uow,
         division_id,
         updated_data.model_dump(),
     )
-    match result:
-        case DivisionServiceOperationResult.DIVISION_NOT_FOUND:
-            return JSONResponse(
-                content=BaseNotFoundResponse(
-                    reason=f"Division {division_id} does not exist."
-                ).model_dump(),
-                status_code=status.HTTP_404_NOT_FOUND,
-            )
-        case DivisionServiceOperationResult.INCORRECT_PARENT:
-            return JSONResponse(
-                content=BaseErrorResponse(
-                    reason=f"Incorrect parent"
-                ).model_dump(),
-                status_code=status.HTTP_400_BAD_REQUEST,
-            )
-
-    return DivisionResponse(
-        data=DivisionSchema.model_validate(updated_division),
-    )
+    return result
 
 
 @router.delete(
@@ -123,13 +92,4 @@ async def delete_division(
     uow: UnitOfWork = Depends(UnitOfWork),
 ):
     result = await DivisionService.delete_by_id(uow, division_id)
-
-    if result == DivisionServiceOperationResult.DIVISION_NOT_FOUND:
-        return JSONResponse(
-            content=BaseNotFoundResponse(
-                reason=f"Division {division_id} does not exist."
-            ).model_dump(),
-            status_code=status.HTTP_404_NOT_FOUND,
-        )
-
-    return BaseResponse()
+    return result

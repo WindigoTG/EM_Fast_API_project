@@ -32,12 +32,14 @@ async def update_user(
     ),
     uow: UnitOfWork = Depends(UnitOfWork),
 ):
-    updated_user = await UserService.update_user(
+    result = await UserService.update_user(
         uow,
         user_id,
+        authenticated_user,
         updated_user_data.first_name,
         updated_user_data.last_name,
     )
+    return result
 
     if not updated_user:
         return JSONResponse(

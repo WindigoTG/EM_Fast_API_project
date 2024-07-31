@@ -41,10 +41,8 @@ async def create_position(
     position: CreatePositionSchema,
     uow: UnitOfWork = Depends(UnitOfWork),
 ):
-    new_position = await PositionService.create_position(uow, position.title)
-    return PositionCreateResponse(
-        data=PositionSchema.model_validate(new_position),
-    )
+    result = await PositionService.create_position(uow, position.title)
+    return result
 
 
 @router.get(
@@ -61,18 +59,8 @@ async def get_position(
     uow: UnitOfWork = Depends(UnitOfWork),
 
 ):
-    position = await PositionService.get_position(uow, position_id)
-    if not position:
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content=BaseNotFoundResponse(
-                reason="Position not found"
-            ),
-        )
-
-    return PositionResponse(
-        data=PositionSchema.model_validate(position),
-    )
+    result = await PositionService.get_position(uow, position_id)
+    return result
 
 
 @router.put(
@@ -89,22 +77,12 @@ async def update_position(
     updated_data: UpdatePositionSchema,
     uow: UnitOfWork = Depends(UnitOfWork),
 ):
-    position = await PositionService.update_position_by_id(
+    result = await PositionService.update_position_by_id(
         uow,
         position_id,
         updated_data.model_dump(),
     )
-    if not position:
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content=BaseNotFoundResponse(
-                reason="Position not found"
-            ),
-        )
-
-    return PositionResponse(
-        data=PositionSchema.model_validate(position),
-    )
+    return result
 
 
 @router.delete(
@@ -117,9 +95,8 @@ async def delete_position(
     position_id: str,
     uow: UnitOfWork = Depends(UnitOfWork),
 ):
-    await PositionService.delete_position(uow, position_id)
-
-    return BaseResponse()
+    result = await PositionService.delete_position(uow, position_id)
+    return result
 
 
 @router.post(
@@ -135,24 +112,13 @@ async def assign_position_to_division(
     div_pos_data: CreateDivisionPositionSchema,
     uow: UnitOfWork = Depends(UnitOfWork),
 ):
-    div_pos = await PositionService.assign_position_to_division(
+    result = await PositionService.assign_position_to_division(
         uow,
         div_pos_data.position_id,
         div_pos_data.division_id,
         div_pos_data.role,
     )
-
-    if not div_pos:
-        return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            content=BaseErrorResponse(
-                reason="Bad request"
-            ),
-        )
-
-    return DivisionPositionCreateResponse(
-        data=DivisionPositionSchema.model_validate(div_pos)
-    )
+    return result
 
 
 @router.delete(
@@ -165,9 +131,11 @@ async def remove_position_from_division(
     div_pos_id: str,
     uow: UnitOfWork = Depends(UnitOfWork),
 ):
-    await PositionService.remove_position_from_division(uow, div_pos_id)
-
-    return BaseResponse()
+    result = await PositionService.remove_position_from_division(
+        uow,
+        div_pos_id,
+    )
+    return result
 
 
 @router.put(
@@ -184,23 +152,12 @@ async def update_division_position(
     role: RoleDivisionPositionSchema,
     uow: UnitOfWork = Depends(UnitOfWork),
 ):
-    div_pos = await PositionService.update_division_position(
+    result = await PositionService.update_division_position(
         uow,
         div_pos_id,
         role.model_dump()
     )
-
-    if not div_pos:
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={
-                "reason": "Division position not found"
-            }
-        )
-
-    return DivisionPositionResponse(
-        data=DivisionPositionSchema.model_validate(div_pos)
-    )
+    return result
 
 
 @router.get(
@@ -216,22 +173,11 @@ async def get_division_position(
     div_pos_id: str,
     uow: UnitOfWork = Depends(UnitOfWork),
 ):
-    div_pos = await PositionService.get_division_position(
+    result = await PositionService.get_division_position(
         uow,
         div_pos_id,
     )
-
-    if not div_pos:
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content=BaseNotFoundResponse(
-                reason="Division position not found"
-            ),
-        )
-
-    return DivisionPositionResponse(
-        data=DivisionPositionSchema.model_validate(div_pos)
-    )
+    return result
 
 
 @router.post(
@@ -248,23 +194,12 @@ async def assign_user_to_position(
     user_data: UserDivisionPositionSchema,
     uow: UnitOfWork = Depends(UnitOfWork),
 ):
-    div_pos = await PositionService.update_division_position(
+    result = await PositionService.update_division_position(
         uow,
         div_pos_id,
         user_data.model_dump(),
     )
-
-    if not div_pos:
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content=BaseNotFoundResponse(
-                reason= "Division position not found"
-            ),
-        )
-
-    return DivisionPositionResponse(
-        data=DivisionPositionSchema.model_validate(div_pos)
-    )
+    return result
 
 
 @router.delete(
@@ -280,22 +215,11 @@ async def remove_user_from_position(
     div_pos_id: str,
     uow: UnitOfWork = Depends(UnitOfWork),
 ):
-    div_pos = await PositionService.update_division_position(
+    result = await PositionService.update_division_position(
         uow,
         div_pos_id,
         {
             "user_id": None
         },
     )
-
-    if not div_pos:
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content=BaseNotFoundResponse(
-                reason= "Division position not found"
-            ),
-        )
-
-    return DivisionPositionResponse(
-        data=DivisionPositionSchema.model_validate(div_pos)
-    )
+    return result
