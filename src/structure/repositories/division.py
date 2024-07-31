@@ -1,6 +1,6 @@
-from typing import Union
+from typing import Union, Optional
 
-from sqlalchemy import select
+from sqlalchemy import select, func, update
 from sqlalchemy.engine import Result
 
 from src.structure.models import Division
@@ -34,11 +34,21 @@ class DivisionRepository(SqlAlchemyRepository):
         _obj = await super().add_one_and_get_obj(**_kwargs)
         return _obj
 
-    async def reset_path(self, parent_path: str):
-        query = select(self.model).filter(
-            self.model.path.descendant_of(Ltree(parent_path)),
+    async def change_path_of_descendants(
+        self,
+        parent_path: Ltree,
+        new_parent_path: Optional[Ltree],
+    ):
+        parent_idx = len(parent_path)
+        query = update(self.model).filter(
+            self.model.path.descendant_of(parent_path)
+        ).values(
+            path=(
+                func.text2ltree(new_parent_path.path).op('||')(
+                    func.subpath(self.model.path, parent_idx)
+                )
+                if parent_idx > 1
+                else func.subpath(self.model.path, parent_idx)
+            )
         )
-        res: Result = await self.session.execute(query)
-        descendants_to_reset = res.scalars().all()
-        for descendant in descendants_to_reset:
-            descendant.path = Ltree(str(descendant.id))
+        await self.session.execute(query)

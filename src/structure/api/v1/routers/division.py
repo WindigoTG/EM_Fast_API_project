@@ -118,7 +118,7 @@ async def update_division(
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(AuthorizationService.get_current_auth_admin)]
 )
-async def update_division(
+async def delete_division(
     division_id: int,
     uow: DivisionUnitOfWork = Depends(DivisionUnitOfWork),
 ):

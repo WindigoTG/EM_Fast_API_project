@@ -30,6 +30,17 @@ class DivisionService(BaseService):
             parent_id = None
 
         async with uow:
+            obj_to_update = await uow.__dict__[
+                    cls.base_repository
+                ].get_by_query_one_or_none(id=_id)
+
+            if not obj_to_update:
+                return (
+                    DivisionServiceOperationResult.DIVISION_NOT_FOUND,
+                    None
+                )
+            old_path = obj_to_update.path
+
             parent = None
             if parent_path:
                 parent = await uow.__dict__[
@@ -50,19 +61,17 @@ class DivisionService(BaseService):
             if new_path != div_path and new_path.ancestor_of(div_path):
                 return DivisionServiceOperationResult.INCORRECT_PARENT, None
 
-            if parent:
-                updated_data["path"] = new_path
+            updated_data["path"] = new_path
 
             _obj = await uow.__dict__[cls.base_repository].update_one_by_id(
                 _id=_id,
                 values=updated_data,
             )
 
-            if not _obj:
-                return (
-                    DivisionServiceOperationResult.DIVISION_NOT_FOUND,
-                    None
-                )
+            if _obj.path != old_path:
+                await uow.__dict__[
+                    cls.base_repository
+                ].change_path_of_descendants(old_path, _obj.path)
 
             return DivisionServiceOperationResult.SUCCESS, _obj
 
@@ -88,6 +97,6 @@ class DivisionService(BaseService):
 
             await uow.__dict__[
                 cls.base_repository
-            ].reset_path(path)
+            ].change_path_of_descendants(path, path[0:-1])
 
             return DivisionServiceOperationResult.SUCCESS
