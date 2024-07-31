@@ -1,4 +1,4 @@
-from src.structure.models import Position
+from src.models import Position
 from src.utils.repository import SqlAlchemyRepository
 
 

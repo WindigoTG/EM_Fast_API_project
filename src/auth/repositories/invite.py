@@ -1,4 +1,4 @@
-from src.auth.models import Invite
+from src.models import Invite
 from src.utils.repository import SqlAlchemyRepository
 
 

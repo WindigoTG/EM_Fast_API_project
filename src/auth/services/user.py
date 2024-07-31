@@ -2,7 +2,7 @@ from typing import Union
 from uuid import uuid4
 
 from src.utils.service import BaseService
-from src.auth.models.user import User
+from src.models.user import User
 from src.utils.unit_of_work import UnitOfWork
 
 

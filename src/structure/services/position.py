@@ -1,7 +1,7 @@
 from typing import Optional
 from uuid import uuid4
 
-from src.structure.models import DivisionPosition, Position
+from src.models import DivisionPosition, Position
 from src.utils.unit_of_work import UnitOfWork
 
 

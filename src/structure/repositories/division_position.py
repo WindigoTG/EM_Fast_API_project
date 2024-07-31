@@ -1,4 +1,4 @@
-from src.structure.models import DivisionPosition
+from src.models import DivisionPosition
 from src.utils.repository import SqlAlchemyRepository
 
 

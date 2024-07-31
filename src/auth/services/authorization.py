@@ -9,7 +9,7 @@ from fastapi.security import (
     OAuth2PasswordBearer,
 )
 
-from src.auth.models import User
+from src.models import User
 from src.auth.schemas.user import UserSchema
 from src.auth.schemas.jwt_token import TokenSchema
 from src.auth.utils import jwt_encoder, password_hasher

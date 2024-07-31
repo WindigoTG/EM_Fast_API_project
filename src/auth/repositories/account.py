@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.engine import Result
 from sqlalchemy.orm import joinedload
 
-from src.auth.models import Account, Secret
+from src.models import Account, Secret
 from src.utils.repository import SqlAlchemyRepository
 
 

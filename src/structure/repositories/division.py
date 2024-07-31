@@ -1,10 +1,9 @@
 from typing import Union, Optional
 
-from sqlalchemy import select, func, update
-from sqlalchemy.engine import Result
+from sqlalchemy import func, update
 
-from src.structure.models import Division
-from src.structure.models.division import id_seq
+from src.models import Division
+from src.models.division import id_seq
 from src.utils.repository import SqlAlchemyRepository
 from sqlalchemy_utils import Ltree
 
