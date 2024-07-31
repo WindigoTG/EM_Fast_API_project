@@ -8,7 +8,6 @@ from src.schemas.responses import (
     BaseResponse,
 )
 from src.structure.services.position import PositionService
-from src.structure.units_of_work.position import PositionUnitOfWork
 from src.structure.schemas.division_position import (
     CreateDivisionPositionSchema,
     DivisionPositionSchema,
@@ -26,6 +25,8 @@ from src.structure.schemas.responses import (
     PositionCreateResponse,
     PositionResponse,
 )
+from src.utils.unit_of_work import UnitOfWork
+
 
 router = APIRouter()
 
@@ -38,7 +39,7 @@ router = APIRouter()
 )
 async def create_position(
     position: CreatePositionSchema,
-    uow: PositionUnitOfWork = Depends(PositionUnitOfWork),
+    uow: UnitOfWork = Depends(UnitOfWork),
 ):
     new_position = await PositionService.create_position(uow, position.title)
     return PositionCreateResponse(
@@ -57,7 +58,7 @@ async def create_position(
 )
 async def get_position(
     position_id: str,
-    uow: PositionUnitOfWork = Depends(PositionUnitOfWork),
+    uow: UnitOfWork = Depends(UnitOfWork),
 
 ):
     position = await PositionService.get_position(uow, position_id)
@@ -86,7 +87,7 @@ async def get_position(
 async def update_position(
     position_id: str,
     updated_data: UpdatePositionSchema,
-    uow: PositionUnitOfWork = Depends(PositionUnitOfWork),
+    uow: UnitOfWork = Depends(UnitOfWork),
 ):
     position = await PositionService.update_position_by_id(
         uow,
@@ -114,7 +115,7 @@ async def update_position(
 )
 async def delete_position(
     position_id: str,
-    uow: PositionUnitOfWork = Depends(PositionUnitOfWork),
+    uow: UnitOfWork = Depends(UnitOfWork),
 ):
     await PositionService.delete_position(uow, position_id)
 
@@ -132,7 +133,7 @@ async def delete_position(
 )
 async def assign_position_to_division(
     div_pos_data: CreateDivisionPositionSchema,
-    uow: PositionUnitOfWork = Depends(PositionUnitOfWork),
+    uow: UnitOfWork = Depends(UnitOfWork),
 ):
     div_pos = await PositionService.assign_position_to_division(
         uow,
@@ -162,7 +163,7 @@ async def assign_position_to_division(
 )
 async def remove_position_from_division(
     div_pos_id: str,
-    uow: PositionUnitOfWork = Depends(PositionUnitOfWork),
+    uow: UnitOfWork = Depends(UnitOfWork),
 ):
     await PositionService.remove_position_from_division(uow, div_pos_id)
 
@@ -181,7 +182,7 @@ async def remove_position_from_division(
 async def update_division_position(
     div_pos_id: str,
     role: RoleDivisionPositionSchema,
-    uow: PositionUnitOfWork = Depends(PositionUnitOfWork),
+    uow: UnitOfWork = Depends(UnitOfWork),
 ):
     div_pos = await PositionService.update_division_position(
         uow,
@@ -213,7 +214,7 @@ async def update_division_position(
 )
 async def get_division_position(
     div_pos_id: str,
-    uow: PositionUnitOfWork = Depends(PositionUnitOfWork),
+    uow: UnitOfWork = Depends(UnitOfWork),
 ):
     div_pos = await PositionService.get_division_position(
         uow,
@@ -245,7 +246,7 @@ async def get_division_position(
 async def assign_user_to_position(
     div_pos_id: str,
     user_data: UserDivisionPositionSchema,
-    uow: PositionUnitOfWork = Depends(PositionUnitOfWork),
+    uow: UnitOfWork = Depends(UnitOfWork),
 ):
     div_pos = await PositionService.update_division_position(
         uow,
@@ -277,7 +278,7 @@ async def assign_user_to_position(
 )
 async def remove_user_from_position(
     div_pos_id: str,
-    uow: PositionUnitOfWork = Depends(PositionUnitOfWork),
+    uow: UnitOfWork = Depends(UnitOfWork),
 ):
     div_pos = await PositionService.update_division_position(
         uow,

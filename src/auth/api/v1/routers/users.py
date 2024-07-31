@@ -8,8 +8,8 @@ from src.auth.schemas.user import (
 )
 from src.auth.services.authorization import AuthorizationService
 from src.auth.services.user import UserService
-from src.auth.units_of_work.user import UserUnitOfWork
 from src.schemas.responses import BaseNotFoundResponse
+from src.utils.unit_of_work import UnitOfWork
 
 
 router = APIRouter()
@@ -29,7 +29,7 @@ async def update_user(
     authenticated_user: UserSchema = Depends(
         AuthorizationService.get_current_auth_user,
     ),
-    uow: UserUnitOfWork = Depends(UserUnitOfWork),
+    uow: UnitOfWork = Depends(UnitOfWork),
 ):
     updated_user = await UserService.update_user(
         uow,

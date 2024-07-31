@@ -30,7 +30,7 @@ class DivisionService(BaseService):
             parent_id = None
 
         async with uow:
-            obj_to_update = await uow.__dict__[
+            obj_to_update = await uow.repositories[
                     cls.base_repository
                 ].get_by_query_one_or_none(id=_id)
 
@@ -43,12 +43,12 @@ class DivisionService(BaseService):
 
             parent = None
             if parent_path:
-                parent = await uow.__dict__[
+                parent = await uow.repositories[
                     cls.base_repository
                 ].get_by_query_one_or_none(path=Ltree(parent_path))
 
             if not parent and parent_id:
-                parent = await uow.__dict__[
+                parent = await uow.repositories[
                     cls.base_repository
                 ].get_by_query_one_or_none(id=parent_id)
 
@@ -63,13 +63,15 @@ class DivisionService(BaseService):
 
             updated_data["path"] = new_path
 
-            _obj = await uow.__dict__[cls.base_repository].update_one_by_id(
+            _obj = await uow.repositories[
+                cls.base_repository
+            ].update_one_by_id(
                 _id=_id,
                 values=updated_data,
             )
 
             if _obj.path != old_path:
-                await uow.__dict__[
+                await uow.repositories[
                     cls.base_repository
                 ].change_path_of_descendants(old_path, _obj.path)
 
@@ -82,7 +84,7 @@ class DivisionService(BaseService):
         _id: Union[int, str],
     ) -> DivisionServiceOperationResult:
         async with uow:
-            division_to_delete = await uow.__dict__[
+            division_to_delete = await uow.repositories[
                 cls.base_repository
             ].get_by_query_one_or_none(id=_id)
 
@@ -91,11 +93,11 @@ class DivisionService(BaseService):
 
             path = division_to_delete.path
 
-            await uow.__dict__[
+            await uow.repositories[
                 cls.base_repository
             ].delete_by_query(id=_id)
 
-            await uow.__dict__[
+            await uow.repositories[
                 cls.base_repository
             ].change_path_of_descendants(path, path[0:-1])
 

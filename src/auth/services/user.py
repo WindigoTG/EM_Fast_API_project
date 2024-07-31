@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from src.utils.service import BaseService
 from src.auth.models.user import User
-from src.auth.units_of_work.user import UserUnitOfWork
+from src.utils.unit_of_work import UnitOfWork
 
 
 class UserService(BaseService):
@@ -12,7 +12,7 @@ class UserService(BaseService):
     @classmethod
     async def update_user(
         cls,
-        uow: UserUnitOfWork,
+        uow: UnitOfWork,
         user_id: Union[int, str, uuid4],
         first_name: str | None = None,
         last_name: str | None = None,

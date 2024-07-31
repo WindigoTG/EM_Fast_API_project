@@ -2,14 +2,14 @@ from typing import Optional
 from uuid import uuid4
 
 from src.structure.models import DivisionPosition, Position
-from src.structure.units_of_work.position import PositionUnitOfWork
+from src.utils.unit_of_work import UnitOfWork
 
 
 class PositionService:
     @classmethod
     async def create_position(
         cls,
-        uow: PositionUnitOfWork,
+        uow: UnitOfWork,
         title: str
     ) -> Position:
         async with uow:
@@ -23,7 +23,7 @@ class PositionService:
     @classmethod
     async def get_position(
         cls,
-        uow: PositionUnitOfWork,
+        uow: UnitOfWork,
         position_id: uuid4,
     ) -> Optional[Position]:
         async with uow:
@@ -37,7 +37,7 @@ class PositionService:
     @classmethod
     async def update_position_by_id(
         cls,
-        uow: PositionUnitOfWork,
+        uow: UnitOfWork,
         position_id: uuid4,
         updated_data: dict,
     ) -> Position:
@@ -54,7 +54,7 @@ class PositionService:
     @classmethod
     async def delete_position(
         cls,
-        uow: PositionUnitOfWork,
+        uow: UnitOfWork,
         position_id: uuid4,
     ):
         async with uow:
@@ -65,7 +65,7 @@ class PositionService:
     @classmethod
     async def assign_position_to_division(
         cls,
-        uow: PositionUnitOfWork,
+        uow: UnitOfWork,
         position_id: uuid4,
         division_id: int,
         role: str,
@@ -86,9 +86,9 @@ class PositionService:
     @classmethod
     async def remove_position_from_division(
         cls,
-        uow: PositionUnitOfWork,
+        uow: UnitOfWork,
         div_pos_id: uuid4,
-    ) -> DivisionPosition:
+    ):
         async with uow:
             await uow.repositories["division_position"].delete_by_query(
                 id=div_pos_id,
@@ -97,7 +97,7 @@ class PositionService:
     @classmethod
     async def update_division_position(
         cls,
-        uow: PositionUnitOfWork,
+        uow: UnitOfWork,
         div_pos_id: uuid4,
         updated_data: dict,
     ) -> DivisionPosition:
@@ -114,7 +114,7 @@ class PositionService:
     @classmethod
     async def get_division_position(
         cls,
-        uow: PositionUnitOfWork,
+        uow: UnitOfWork,
         div_pos_id: uuid4,
     ) -> Optional[DivisionPosition]:
         async with uow:

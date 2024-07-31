@@ -8,13 +8,13 @@ from src.schemas.responses import (
     BaseResponse,
 )
 from src.structure.services.division import DivisionService
-from src.structure.units_of_work.division import DivisionUnitOfWork
 from src.structure.schemas.division import DivisionSchema, UpdateDivisionSchema
 from src.structure.schemas.responses import (
     DivisionCreateResponse,
     DivisionResponse,
 )
 from src.structure.utils.enums import DivisionServiceOperationResult
+from src.utils.unit_of_work import UnitOfWork
 
 
 router = APIRouter()
@@ -28,7 +28,7 @@ router = APIRouter()
 )
 async def create_division(
     name: str,
-    uow: DivisionUnitOfWork = Depends(DivisionUnitOfWork),
+    uow: UnitOfWork = Depends(UnitOfWork),
 ):
     new_division = await DivisionService.add_one_and_get_obj(uow, name=name)
 
@@ -48,7 +48,7 @@ async def create_division(
 )
 async def get_division(
     division_id: int,
-    uow: DivisionUnitOfWork = Depends(DivisionUnitOfWork),
+    uow: UnitOfWork = Depends(UnitOfWork),
 ):
     division = await DivisionService.get_by_query_one_or_none(
         uow,
@@ -80,7 +80,7 @@ async def get_division(
 async def update_division(
     division_id: int,
     updated_data: UpdateDivisionSchema,
-    uow: DivisionUnitOfWork = Depends(DivisionUnitOfWork),
+    uow: UnitOfWork = Depends(UnitOfWork),
 ):
     result, updated_division = await DivisionService.update_one_by_id(
         uow,
@@ -120,7 +120,7 @@ async def update_division(
 )
 async def delete_division(
     division_id: int,
-    uow: DivisionUnitOfWork = Depends(DivisionUnitOfWork),
+    uow: UnitOfWork = Depends(UnitOfWork),
 ):
     result = await DivisionService.delete_by_id(uow, division_id)
 

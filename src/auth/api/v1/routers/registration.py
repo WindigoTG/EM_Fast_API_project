@@ -18,9 +18,9 @@ from src.auth.schemas.user import (
 )
 from src.auth.services.authorization import AuthorizationService
 from src.auth.services.registration import RegistrationService
-from src.auth.units_of_work.auth import AuthUnitOfWork
 from src.auth.utils.enums import RegistrationServiceResultEnum
 from src.schemas.responses import BaseErrorResponse, BaseResponse
+from src.utils.unit_of_work import UnitOfWork
 
 router = APIRouter()
 
@@ -31,7 +31,7 @@ router = APIRouter()
 )
 async def check_account(
     account: str,
-    uow: AuthUnitOfWork = Depends(AuthUnitOfWork),
+    uow: UnitOfWork = Depends(UnitOfWork),
 ):
     is_available = await RegistrationService.check_if_account_available(
         uow,
@@ -52,7 +52,7 @@ async def check_account(
 )
 async def register_new_account(
     account: CreateAccountSchema,
-    uow: AuthUnitOfWork = Depends(AuthUnitOfWork),
+    uow: UnitOfWork = Depends(UnitOfWork),
 ):
     result = await RegistrationService.create_account(uow, account.account)
     match result:
@@ -77,7 +77,7 @@ async def register_new_account(
 )
 async def verify_account(
     account: VerifyAccountSchema,
-    uow: AuthUnitOfWork = Depends(AuthUnitOfWork),
+    uow: UnitOfWork = Depends(UnitOfWork),
 ):
     result = await RegistrationService.verify_account(
         uow,
@@ -120,7 +120,7 @@ async def verify_account(
 )
 async def verify_account(
     user: CreateUserWithCompanySchema,
-    uow: AuthUnitOfWork = Depends(AuthUnitOfWork),
+    uow: UnitOfWork = Depends(UnitOfWork),
 ):
     result, response = await RegistrationService.create_user_and_company(
         uow,
@@ -171,7 +171,7 @@ async def register_employee(
     company_admin: UserSchema = Depends(
         AuthorizationService.get_current_auth_admin,
     ),
-    uow: AuthUnitOfWork = Depends(AuthUnitOfWork),
+    uow: UnitOfWork = Depends(UnitOfWork),
 ):
     result = (
         await RegistrationService.create_account_and_user_for_company(
@@ -218,7 +218,7 @@ async def update_email(
     user: UserSchema = Depends(
         AuthorizationService.get_current_auth_user,
     ),
-    uow: AuthUnitOfWork = Depends(AuthUnitOfWork),
+    uow: UnitOfWork = Depends(UnitOfWork),
 ):
     result = (
         await RegistrationService.change_account(

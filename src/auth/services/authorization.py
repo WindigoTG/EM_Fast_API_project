@@ -14,8 +14,8 @@ from src.auth.schemas.user import UserSchema
 from src.auth.schemas.jwt_token import TokenSchema
 from src.auth.utils import jwt_encoder, password_hasher
 from src.auth.utils.enums import TokenTypeEnum
-from src.auth.units_of_work.auth import AuthUnitOfWork
 from src.config import settings
+from src.utils.unit_of_work import UnitOfWork
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/api/v1/auth/jwt/login/",
@@ -36,7 +36,7 @@ class AuthorizationService:
     @classmethod
     async def mint_token(
         cls,
-        uow: AuthUnitOfWork = Depends(AuthUnitOfWork),
+        uow: UnitOfWork = Depends(UnitOfWork),
         account: str = Form(alias="username", ),
         password: str = Form(),
     ) -> TokenSchema:
@@ -75,7 +75,7 @@ class AuthorizationService:
     @classmethod
     async def refresh_token(
             cls,
-            uow: AuthUnitOfWork = Depends(AuthUnitOfWork),
+            uow: UnitOfWork = Depends(UnitOfWork),
             token: str = Depends(oauth2_scheme)
     ) -> TokenSchema:
         user = await cls._get_user_from_token(
@@ -92,7 +92,7 @@ class AuthorizationService:
     @classmethod
     async def get_current_auth_user(
         cls,
-        uow: AuthUnitOfWork = Depends(AuthUnitOfWork),
+        uow: UnitOfWork = Depends(UnitOfWork),
         token: str = Depends(oauth2_scheme)
     ) -> UserSchema:
 
@@ -107,7 +107,7 @@ class AuthorizationService:
     @classmethod
     async def get_current_auth_admin(
         cls,
-        uow: AuthUnitOfWork = Depends(AuthUnitOfWork),
+        uow: UnitOfWork = Depends(UnitOfWork),
         token: str = Depends(oauth2_scheme),
     ):
         current_user = await AuthorizationService.get_current_auth_user(
@@ -136,7 +136,7 @@ class AuthorizationService:
         cls,
         token: str,
         token_type: TokenTypeEnum,
-        uow: AuthUnitOfWork,
+        uow: UnitOfWork,
     ) -> User:
         payload = cls._get_token_payload(token)
         cls._validate_token_type(payload, token_type)
