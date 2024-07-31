@@ -3,17 +3,15 @@ from typing import Dict
 
 from src.database.db import async_session_maker
 from src.utils.repository import SqlAlchemyRepository
-from src.auth.repositories import (
+from src.repositories import (
     AccountRepository,
     CompanyRepository,
-    InviteRepository,
-    SecretRepository,
-    UserRepository,
-)
-from src.structure.repositories import (
     DivisionRepository,
     DivisionPositionRepository,
+    InviteRepository,
     PositionRepository,
+    SecretRepository,
+    UserRepository,
 )
 
 
