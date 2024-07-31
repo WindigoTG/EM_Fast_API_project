@@ -3,11 +3,10 @@ import sys
 sys.path.append("..")
 
 from dotenv import load_dotenv, find_dotenv
-from fastapi import APIRouter, FastAPI
+from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 
-from src.auth.api import router as auth_router
-from src.structure.api import router as structure_router
+from src.api import router as api_router
 
 
 def create_fast_api_app():
@@ -24,10 +23,8 @@ def create_fast_api_app():
             docs_url=None,
             redoc_url=None
         )
-    router = APIRouter()
-    router.include_router(auth_router)
-    router.include_router(structure_router)
-    _app.include_router(router, prefix="/api")
+
+    _app.include_router(api_router, prefix="/api")
 
     return _app
 

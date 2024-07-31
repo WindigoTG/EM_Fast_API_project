@@ -22,6 +22,7 @@ router = APIRouter()
     },
     response_model=UserSchema,
     status_code=status.HTTP_200_OK,
+    dependencies=[]
 )
 async def update_user(
     user_id: UUID4,
