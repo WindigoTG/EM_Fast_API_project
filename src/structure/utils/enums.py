@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, StrEnum
 
 
 class DivisionServiceOperationResult(Enum):
@@ -7,6 +7,6 @@ class DivisionServiceOperationResult(Enum):
     DIVISION_NOT_FOUND = 2
 
 
-class RoleEnum(Enum):
-    employee = 0
-    manager = 1
+class RoleEnum(StrEnum):
+    employee = "employee"
+    manager = "manager"

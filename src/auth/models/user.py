@@ -24,4 +24,6 @@ class User(BaseModel):
     company_id: Mapped[uuid4] = mapped_column(ForeignKey("company.id"))
     company: Mapped["Company"] = relationship(back_populates="users")
 
-    positions: Mapped[List["Position"]] = relationship(back_populates="user")
+    positions: Mapped[List["DivisionPosition"]] = relationship(
+        back_populates="user",
+    )

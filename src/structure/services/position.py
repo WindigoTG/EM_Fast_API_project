@@ -40,7 +40,7 @@ class PositionService:
         uow: PositionUnitOfWork,
         position_id: uuid4,
         updated_data: dict,
-    ):
+    ) -> Position:
         async with uow:
             updated_position = (
                 await uow.repositories["position"].update_one_by_id(
