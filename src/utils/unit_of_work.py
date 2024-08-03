@@ -11,6 +11,9 @@ from src.repositories import (
     InviteRepository,
     PositionRepository,
     SecretRepository,
+    StepRepository,
+    TaskRepository,
+    TaskUserRepository,
     UserRepository,
 )
 
@@ -54,6 +57,9 @@ class UnitOfWork(AbstractUnitOfWork):
         self.repositories["position"] = PositionRepository(self.session)
         self.repositories["secret"] = SecretRepository(self.session)
         self.repositories["user"] = UserRepository(self.session)
+        self.repositories["step"] = StepRepository(self.session)
+        self.repositories["task"] = TaskRepository(self.session)
+        self.repositories["task_user"] = TaskUserRepository(self.session)
 
     async def __aenter__(self):
         self.session = self.session_factory()
