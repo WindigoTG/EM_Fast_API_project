@@ -27,3 +27,17 @@ class User(BaseModel):
     positions: Mapped[List["DivisionPosition"]] = relationship(
         back_populates="user",
     )
+    created_tasks: Mapped[List["Task"]] = relationship(
+        back_populates="author",
+    )
+    approvement_tasks: Mapped[List["Task"]] = relationship(
+        back_populates="approver",
+    )
+    observed_tasks: Mapped[List["Task"]] = relationship(
+        secondary="task_user",
+        back_populates="observers"
+    )
+    assigned_tasks: Mapped[List["Task"]] = relationship(
+        secondary="task_user",
+        back_populates="performers"
+    )

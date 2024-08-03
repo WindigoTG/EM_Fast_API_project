@@ -32,6 +32,7 @@ class DivisionPosition(BaseModel):
     role: Mapped[Enum] = mapped_column(Enum(RoleEnum))
 
     user_id: Mapped[Optional[uuid4]] = mapped_column(
+        UUID,
         ForeignKey("user.id"),
         nullable=True,
         default=None,
