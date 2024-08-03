@@ -13,7 +13,8 @@ from src.repositories import (
     SecretRepository,
     StepRepository,
     TaskRepository,
-    TaskUserRepository,
+    TaskObserverRepository,
+    TaskPerformerRepository,
     UserRepository,
 )
 
@@ -47,6 +48,10 @@ class UnitOfWork(AbstractUnitOfWork):
 
     def __init__(self):
         self.session_factory = async_session_maker
+
+    async def __aenter__(self):
+        self.session = self.session_factory()
+        self.repositories = {}
         self.repositories["account"] = AccountRepository(self.session)
         self.repositories["company"] = CompanyRepository(self.session)
         self.repositories["division"] = DivisionRepository(self.session)
@@ -59,10 +64,12 @@ class UnitOfWork(AbstractUnitOfWork):
         self.repositories["user"] = UserRepository(self.session)
         self.repositories["step"] = StepRepository(self.session)
         self.repositories["task"] = TaskRepository(self.session)
-        self.repositories["task_user"] = TaskUserRepository(self.session)
-
-    async def __aenter__(self):
-        self.session = self.session_factory()
+        self.repositories["task_performer"] = TaskPerformerRepository(
+            self.session
+        )
+        self.repositories["task_observer"] = TaskObserverRepository(
+            self.session
+        )
 
     async def __aexit__(self, exc_type, *args):
         if not exc_type:
@@ -76,3 +83,6 @@ class UnitOfWork(AbstractUnitOfWork):
 
     async def rollback(self):
         await self.session.rollback()
+
+    async def refresh_object(self, _obj):
+        await self.session.refresh(_obj)

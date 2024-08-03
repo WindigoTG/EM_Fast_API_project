@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, UUID4
+from pydantic import BaseModel, Field, UUID4, ConfigDict
 
 
 class IdStepSchema(BaseModel):
@@ -12,6 +12,8 @@ class CreateStepSchema(BaseModel):
 
 class StepSchema(IdStepSchema, CreateStepSchema):
     is_complete: bool
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UpdateStepSchema(BaseModel):

@@ -18,7 +18,7 @@ class Task(BaseModel):
     description: Mapped[str] = mapped_column(
         String,
         nullable=True,
-        default=None,
+        default='',
     )
     deadline: Mapped[datetime]
     status: Mapped[Enum] = mapped_column(
@@ -33,6 +33,7 @@ class Task(BaseModel):
     author: Mapped["User"] = relationship(
         back_populates="created_tasks",
         primaryjoin="Task.author_id == User.id",
+        lazy='selectin',
     )
     approver_id: Mapped[Optional[uuid4]] = mapped_column(
         UUID,
@@ -43,13 +44,19 @@ class Task(BaseModel):
     approver: Mapped["User"] = relationship(
         back_populates="approvement_tasks",
         primaryjoin="Task.approver_id == User.id",
+        lazy='selectin',
     )
     observers: Mapped[List["User"]] = relationship(
         secondary="task_observer",
-        back_populates="observed_tasks"
+        back_populates="observed_tasks",
+        lazy='selectin',
     )
     performers: Mapped[List["User"]] = relationship(
         secondary="task_performer",
-        back_populates="assigned_tasks"
+        back_populates="assigned_tasks",
+        lazy='selectin',
     )
-    steps: Mapped[List["Step"]] = relationship(back_populates="task")
+    steps: Mapped[List["Step"]] = relationship(
+        back_populates="task",
+        lazy='selectin',
+    )

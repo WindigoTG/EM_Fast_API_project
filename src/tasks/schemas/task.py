@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List
 
-from pydantic import BaseModel, Field, UUID4
+from pydantic import BaseModel, Field, UUID4, ConfigDict
 
 from src.auth.schemas.user import UserSchema
 from src.tasks.utils.enums import TaskStatusEnum
@@ -25,17 +25,17 @@ class CreateTaskSchema(BaseTaskSchema):
 
 
 class TaskSchema(IdTaskSchema, BaseTaskSchema):
-    description: str = Field(default='')
+    description: str | None = Field(default='')
     deadline: datetime
-    is_complete: bool
     author: UserSchema
     approver: UserSchema | None = Field(default=None)
-    performers: List[UserSchema] = Field(default=[])
-    observers: List[UserSchema] = Field(default=[])
+    performers: List[UserSchema] | None = Field(default=[])
+    observers: List[UserSchema] | None = Field(default=[])
     steps: List[StepSchema] = Field(default=[])
 
+    model_config = ConfigDict(from_attributes=True)
 
-class UpdateStepSchema(CreateTaskSchema):
+
+class UpdateTaskSchema(CreateTaskSchema):
     title: str | None = Field(max_length=50, default=None)
     status: TaskStatusEnum | None = Field(default=None)
-    is_completed: bool | None = Field(default=None)

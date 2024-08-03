@@ -9,7 +9,8 @@ __all__ = [
     "Secret",
     "Step",
     "Task",
-    "TaskUser",
+    "task_observer",
+    "TaskPerformer",
     "User",
 ]
 
@@ -23,5 +24,6 @@ from src.models.position import Position
 from src.models.secret import Secret
 from src.models.step import Step
 from src.models.task import Task
-from src.models.task_user import TaskUser
+from src.models.task_observer import TaskObserver
+from src.models.task_performer import TaskPerformer
 from src.models.user import User
