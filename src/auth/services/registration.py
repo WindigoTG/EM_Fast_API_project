@@ -13,7 +13,6 @@ from src.auth.schemas.responses import (
     UserAndCompanyCreatedResponse,
 )
 from src.auth.schemas.user import UserSchema
-from src.auth.utils.enums import RegistrationServiceResultEnum
 from src.auth.utils.password_hasher import hash_password
 from src.auth.utils.token_generator import generate_int_token
 from src.utils.unit_of_work import UnitOfWork
@@ -255,7 +254,7 @@ class RegistrationService:
                 )
 
             if account == new_account:
-                return RegistrationServiceResultEnum.SUCCESS
+                return BaseResponse()
 
             try:
                 await (

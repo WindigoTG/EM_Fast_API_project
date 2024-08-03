@@ -8,7 +8,6 @@ from src.structure.schemas.responses import (
     DivisionCreateResponse,
     DivisionResponse,
 )
-from src.structure.utils.enums import DivisionServiceOperationResult
 from src.utils.service import BaseService
 from src.utils.response_factory import ResponseFactory
 from src.utils.unit_of_work import UnitOfWork
@@ -42,9 +41,8 @@ class DivisionService(BaseService):
                 ].get_by_query_one_or_none(id=_id)
 
             if not obj_to_update:
-                return (
-                    DivisionServiceOperationResult.DIVISION_NOT_FOUND,
-                    None
+                return ResponseFactory.get_not_found_response(
+                    "Division does not exist."
                 )
             old_path = obj_to_update.path
 
@@ -60,8 +58,8 @@ class DivisionService(BaseService):
                 ].get_by_query_one_or_none(id=parent_id)
 
             if not parent and (parent_path or parent_id):
-                return ResponseFactory.get_not_found_response(
-                    "Division does not exist."
+                return ResponseFactory.get_base_error_response(
+                    "Incorrect parent"
                 )
 
             div_path = Ltree(str(_id))
