@@ -6,8 +6,8 @@ from sqlalchemy.orm import Mapped, mapped_column
 from src.models import BaseModel
 
 
-class TaskUser(BaseModel):
-    __tablename__ = "task_user"
+class TaskPerformer(BaseModel):
+    __tablename__ = "task_performer"
 
     task_id: Mapped[uuid4] = mapped_column(
         UUID,

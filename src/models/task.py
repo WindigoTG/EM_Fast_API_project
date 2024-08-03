@@ -30,20 +30,26 @@ class Task(BaseModel):
         UUID,
         ForeignKey("user.id"),
     )
-    author: Mapped["User"] = relationship(back_populates="created_tasks")
-    approver_id_id: Mapped[Optional[uuid4]] = mapped_column(
+    author: Mapped["User"] = relationship(
+        back_populates="created_tasks",
+        primaryjoin="Task.author_id == User.id",
+    )
+    approver_id: Mapped[Optional[uuid4]] = mapped_column(
         UUID,
         ForeignKey("user.id"),
         nullable=True,
         default=None,
     )
-    approver: Mapped["User"] = relationship(back_populates="approvement_tasks")
+    approver: Mapped["User"] = relationship(
+        back_populates="approvement_tasks",
+        primaryjoin="Task.approver_id == User.id",
+    )
     observers: Mapped[List["User"]] = relationship(
-        secondary="task_user",
+        secondary="task_observer",
         back_populates="observed_tasks"
     )
     performers: Mapped[List["User"]] = relationship(
-        secondary="task_user",
+        secondary="task_performer",
         back_populates="assigned_tasks"
     )
     steps: Mapped[List["Step"]] = relationship(back_populates="task")

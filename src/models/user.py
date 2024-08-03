@@ -28,16 +28,20 @@ class User(BaseModel):
         back_populates="user",
     )
     created_tasks: Mapped[List["Task"]] = relationship(
+        "Task",
         back_populates="author",
+        foreign_keys="Task.author_id",
     )
     approvement_tasks: Mapped[List["Task"]] = relationship(
+        "Task",
         back_populates="approver",
+        foreign_keys="Task.approver_id",
     )
     observed_tasks: Mapped[List["Task"]] = relationship(
-        secondary="task_user",
+        secondary="task_observer",
         back_populates="observers"
     )
     assigned_tasks: Mapped[List["Task"]] = relationship(
-        secondary="task_user",
+        secondary="task_performer",
         back_populates="performers"
     )
