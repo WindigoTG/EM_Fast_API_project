@@ -9,6 +9,7 @@ from .v1.routers import (
     v1_division_router,
     v1_position_router,
     v1_registration_router,
+    v1_tasks_router,
     v1_users_router,
 )
 
@@ -39,4 +40,9 @@ router.include_router(
     v1_position_router,
     prefix="/v1/positions",
     tags=["v1", "positions", "structure"],
+)
+router.include_router(
+    v1_tasks_router,
+    prefix="/v1/tasks",
+    tags=["v1", "tasks"],
 )

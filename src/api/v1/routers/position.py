@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, status
-from fastapi.responses import JSONResponse
 
 from src.auth.services.authorization import AuthorizationService
 from src.schemas.responses import (
@@ -16,11 +15,9 @@ from src.structure.schemas.division_position import (
 )
 from src.structure.schemas.position import (
     CreatePositionSchema,
-    PositionSchema,
     UpdatePositionSchema,
 )
 from src.structure.schemas.responses import (
-    DivisionPositionCreateResponse,
     DivisionPositionResponse,
     PositionCreateResponse,
     PositionResponse,
