@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, status
-from fastapi.responses import JSONResponse
 from pydantic import UUID4
 
 from src.auth.schemas.user import (

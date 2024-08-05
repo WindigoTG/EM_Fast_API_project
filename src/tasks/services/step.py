@@ -1,7 +1,5 @@
 from uuid import uuid4
 
-from fastapi import status
-from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError
 
 from schemas.responses import BaseResponse

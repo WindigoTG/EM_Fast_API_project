@@ -9,7 +9,7 @@ __all__ = [
     "Secret",
     "Step",
     "Task",
-    "task_observer",
+    "TaskObserver",
     "TaskPerformer",
     "User",
 ]

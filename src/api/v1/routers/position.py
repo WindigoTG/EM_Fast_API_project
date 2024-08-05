@@ -9,7 +9,6 @@ from src.schemas.responses import (
 from src.structure.services.position import PositionService
 from src.structure.schemas.division_position import (
     CreateDivisionPositionSchema,
-    DivisionPositionSchema,
     RoleDivisionPositionSchema,
     UserDivisionPositionSchema,
 )
