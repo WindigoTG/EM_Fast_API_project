@@ -3,6 +3,16 @@ from typing import Dict
 
 from src.database.db import async_session_maker
 from src.utils.repository import SqlAlchemyRepository
+from src.repositories import (
+    AccountRepository,
+    CompanyRepository,
+    DivisionRepository,
+    DivisionPositionRepository,
+    InviteRepository,
+    PositionRepository,
+    SecretRepository,
+    UserRepository,
+)
 
 
 class AbstractUnitOfWork(ABC):
@@ -34,6 +44,16 @@ class UnitOfWork(AbstractUnitOfWork):
 
     def __init__(self):
         self.session_factory = async_session_maker
+        self.repositories["account"] = AccountRepository(self.session)
+        self.repositories["company"] = CompanyRepository(self.session)
+        self.repositories["division"] = DivisionRepository(self.session)
+        self.repositories["division_position"] = DivisionPositionRepository(
+            self.session,
+        )
+        self.repositories["invite"] = InviteRepository(self.session)
+        self.repositories["position"] = PositionRepository(self.session)
+        self.repositories["secret"] = SecretRepository(self.session)
+        self.repositories["user"] = UserRepository(self.session)
 
     async def __aenter__(self):
         self.session = self.session_factory()

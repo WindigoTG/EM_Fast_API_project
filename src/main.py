@@ -6,7 +6,7 @@ from dotenv import load_dotenv, find_dotenv
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 
-from src.auth.api import router as auth_router
+from src.api import router as api_router
 
 
 def create_fast_api_app():
@@ -24,7 +24,7 @@ def create_fast_api_app():
             redoc_url=None
         )
 
-    _app.include_router(auth_router, prefix="/api")
+    _app.include_router(api_router, prefix="/api")
 
     return _app
 

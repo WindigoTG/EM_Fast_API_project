@@ -14,3 +14,7 @@ class BaseErrorResponse(BaseResponse):
 
 class BaseNotFoundResponse(BaseErrorResponse):
     status: int = 404
+
+
+class BaseCreateResponse(BaseResponse):
+    status: int = 201

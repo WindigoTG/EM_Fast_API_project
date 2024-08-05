@@ -21,7 +21,7 @@ class BaseService:
             **kwargs
     ) -> None:
         async with uow:
-            await uow.__dict__[cls.base_repository].add_one(**kwargs)
+            await uow.repositories[cls.base_repository].add_one(**kwargs)
 
     @classmethod
     async def add_one_and_get_id(
@@ -30,9 +30,9 @@ class BaseService:
             **kwargs
     ) -> Union[int, str]:
         async with uow:
-            _id = await uow.__dict__[cls.base_repository].add_one_and_get_id(
-                **kwargs,
-            )
+            _id = await uow.repositories[
+                cls.base_repository
+            ].add_one_and_get_id(**kwargs)
             return _id
 
     @classmethod
@@ -42,9 +42,9 @@ class BaseService:
             **kwargs
     ) -> Any:
         async with uow:
-            _obj = await uow.__dict__[cls.base_repository].add_one_and_get_obj(
-                **kwargs,
-            )
+            _obj = await uow.repositories[
+                cls.base_repository
+            ].add_one_and_get_obj(**kwargs)
             return _obj
 
     @classmethod
@@ -54,9 +54,9 @@ class BaseService:
             **kwargs
     ) -> Optional[Any]:
         async with uow:
-            _result = await uow.__dict__[cls.base_repository].get_by_query_one_or_none(
-                **kwargs,
-            )
+            _result = await uow.repositories[
+                cls.base_repository
+            ].get_by_query_one_or_none(**kwargs)
             return _result
 
     @classmethod
@@ -66,9 +66,9 @@ class BaseService:
             **kwargs
     ) -> Sequence[Any]:
         async with uow:
-            _result = await uow.__dict__[cls.base_repository].get_by_query_all(
-                **kwargs,
-            )
+            _result = await uow.repositories[
+                cls.base_repository
+            ].get_by_query_all(**kwargs)
             return _result
 
     @classmethod
@@ -79,7 +79,9 @@ class BaseService:
             values: dict
     ) -> Any:
         async with uow:
-            _obj = await uow.__dict__[cls.base_repository].update_one_by_id(
+            _obj = await uow.repositories[
+                cls.base_repository
+            ].update_one_by_id(
                 _id=_id,
                 values=values,
             )
@@ -92,7 +94,9 @@ class BaseService:
             **kwargs
     ) -> None:
         async with uow:
-            await uow.__dict__[cls.base_repository].delete_by_query(**kwargs)
+            await uow.repositories[
+                cls.base_repository
+            ].delete_by_query(**kwargs)
 
     @classmethod
     async def delete_all(
@@ -100,4 +104,4 @@ class BaseService:
             uow: UnitOfWork,
     ) -> None:
         async with uow:
-            await uow.__dict__[cls.base_repository].delete_all()
+            await uow.repositories[cls.base_repository].delete_all()

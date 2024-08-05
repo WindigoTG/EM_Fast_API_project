@@ -1,4 +1,4 @@
-from src.auth.models import User
+from src.models import User
 from src.utils.repository import SqlAlchemyRepository
 
 
