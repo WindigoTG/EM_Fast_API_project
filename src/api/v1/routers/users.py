@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, status
-from fastapi.responses import JSONResponse
 from pydantic import UUID4
 
 from src.auth.schemas.user import (
@@ -8,6 +7,7 @@ from src.auth.schemas.user import (
 )
 from src.auth.services.authorization import AuthorizationService
 from src.auth.services.user import UserService
+from src.models import User
 from src.schemas.responses import BaseNotFoundResponse
 from src.utils.unit_of_work import UnitOfWork
 
@@ -27,7 +27,7 @@ router = APIRouter()
 async def update_user(
     user_id: UUID4,
     updated_user_data: UpdateUserSchema,
-    authenticated_user: UserSchema = Depends(
+    authenticated_user: User = Depends(
         AuthorizationService.get_current_auth_user,
     ),
     uow: UnitOfWork = Depends(UnitOfWork),
@@ -40,13 +40,3 @@ async def update_user(
         updated_user_data.last_name,
     )
     return result
-
-    if not updated_user:
-        return JSONResponse(
-            content=BaseNotFoundResponse(
-                reason="User not found."
-            ).model_dump(),
-            status_code=status.HTTP_404_NOT_FOUND,
-        )
-
-    return UserSchema.model_validate(updated_user)

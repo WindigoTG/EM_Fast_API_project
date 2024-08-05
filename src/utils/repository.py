@@ -42,6 +42,10 @@ class AbstractRepository(ABC):
     async def add_multiple(self, values: Dict[str, Any]) -> None:
         raise NotImplementedError
 
+    @abstractmethod
+    async def delete_multiple_by_id(self, values: List[Any]) -> None:
+        raise NotImplementedError
+
 
 class SqlAlchemyRepository(AbstractRepository):
     """
@@ -102,3 +106,7 @@ class SqlAlchemyRepository(AbstractRepository):
     async def add_multiple(self, values: List[Dict[str, Any]]) -> None:
         query = insert(self.model)
         await self.session.execute(query, values)
+
+    async def delete_multiple_by_id(self, values: List[Any]) -> None:
+        query = delete(self.model).filter_by(self.model.id.in_(values))
+        await self.session.execute(query)
